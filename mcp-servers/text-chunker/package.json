@@ -1,0 +1,19 @@
+{
+  "name": "text-chunker-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for text chunking, cleaning, and keyword extraction",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": ["mcp", "text", "chunking", "nlp"],
+  "author": "Vincent Zhu",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "natural": "^8.0.1",
+    "compromise": "^14.14.0"
+  }
+}

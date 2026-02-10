@@ -1,0 +1,66 @@
+# Environment (API keys, secrets)
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Data - videos, audio, and large binary files
+**/data/videos/
+**/data/audio/
+**/data/cache/
+**/data/embeddings/*.index
+**/data/embeddings/*.sqlite
+**/data/embeddings/*.db
+
+# Keep directory structure with .gitkeep
+!**/data/videos/.gitkeep
+!**/data/audio/.gitkeep
+!**/data/chunks/.gitkeep
+!**/data/cache/.gitkeep
+
+# Python virtual environments
+venv/
+env/
+*-env/
+whisper-env/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.fleet/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Build
+dist/
+build/

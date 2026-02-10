@@ -1,0 +1,20 @@
+{
+  "name": "vector-db-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for vector database operations with embeddings",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node test.js"
+  },
+  "keywords": ["mcp", "vector-db", "embeddings", "rag", "similarity-search"],
+  "author": "Vincent Zhu",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "openai": "^4.77.0",
+    "dotenv": "^16.4.7"
+  }
+}

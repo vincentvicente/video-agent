@@ -1,0 +1,16 @@
+This is a test of the Video RAG Agent system.
+
+In this demonstration, we're testing the complete workflow of video processing.
+The system downloads videos, extracts audio, and transcribes using local Whisper.
+
+Then it chunks the text into semantic segments.
+Each segment is converted into a vector embedding using OpenAI's API.
+
+Finally, the system performs semantic search to find relevant content.
+This enables question-answering based on video content.
+
+The hybrid architecture keeps costs low while maintaining quality.
+Local Whisper handles transcription for free.
+Only embeddings require API credits at about two cents per hour.
+
+This makes the system practical for processing large video libraries.

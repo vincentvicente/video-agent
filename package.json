@@ -1,0 +1,41 @@
+{
+  "name": "video-rag-agent",
+  "version": "0.1.0",
+  "description": "Video RAG Agent System with MCP servers and Claude Skills",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/test.js",
+    "setup": "bash scripts/setup.sh",
+    "dev:text-chunker": "node mcp-servers/text-chunker/index.js",
+    "dev:vector-db": "node mcp-servers/vector-db/index.js",
+    "dev:video-processor": "node mcp-servers/video-processor/index.js"
+  },
+  "keywords": [
+    "video",
+    "rag",
+    "agent",
+    "mcp",
+    "claude",
+    "ai",
+    "embeddings",
+    "vector-db"
+  ],
+  "author": "Vincent Zhu",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "compromise": "^14.14.0",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "natural": "^8.0.1",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
