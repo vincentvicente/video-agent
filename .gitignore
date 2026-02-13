@@ -64,3 +64,11 @@ temp/
 # Build
 dist/
 build/
+
+# Worktrees
+.worktrees/
+
+# Java / Maven
+target/
+*.class
+*.jar
