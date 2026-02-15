@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ai-agent-platform
+
+  # MySQL datasource
+  datasource:
+    url: jdbc:mysql://localhost:3306/ai_agent?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Spring AI - Anthropic
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY}
+      chat:
+        options:
+          model: claude-sonnet-4-5-20250929
+          max-tokens: 4096
+          temperature: 0.7
+
+# MyBatis-Plus
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+# PGVector connection (used by LangChain4j directly)
+pgvector:
+  host: localhost
+  port: 5432
+  database: ai_agent_vectors
+  user: postgres
+  password: postgres
+
+# LangChain4j - OpenAI embeddings
+langchain4j:
+  open-ai:
+    embedding-model:
+      api-key: ${OPENAI_API_KEY}
+      model-name: text-embedding-3-small
+
+logging:
+  level:
+    com.vincent.agent: DEBUG
+    org.springframework.ai: DEBUG
