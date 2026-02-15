@@ -81,12 +81,18 @@ async function sendMessage() {
     store.currentConversationId,
     message,
     (token) => store.appendToLastMessage(token),
-    (data) => store.addReactStep({ type: 'ACT', content: `Calling ${data.tool}...` }),
-    (data) => store.addReactStep({ type: 'OBSERVE', content: `${data.tool} returned result` }),
-    (data) => store.addReactStep(data),
+    (data) => {
+      store.addReactStep({ type: 'ACT', content: `Calling tool: ${data.tool}` })
+      store.addToolCall({ tool: data.tool, input: data.input, status: 'running' })
+    },
+    (data) => {
+      store.addReactStep({ type: 'OBSERVE', content: `${data.tool} returned result` })
+      store.updateLastToolCall({ output: data.output, status: 'done' })
+    },
+    (data) => store.addReactStep({ type: data.step || 'THINK', content: data.content }),
     () => { store.isStreaming = false },
     (err) => {
-      store.appendToLastMessage('\n\n[Error: ' + err.message + ']')
+      store.appendToLastMessage('\n\n[Error: ' + (err.message || err) + ']')
       store.isStreaming = false
     }
   )

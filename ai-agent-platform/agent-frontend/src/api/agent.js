@@ -3,13 +3,11 @@ import axios from 'axios'
 const API_BASE = 'http://localhost:8080/api'
 
 export function streamChat(conversationId, message, onToken, onToolStart, onToolEnd, onReactStep, onDone, onError) {
-  const response = fetch(`${API_BASE}/chat/stream`, {
+  fetch(`${API_BASE}/chat/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ conversationId, message })
-  })
-
-  response.then(async (res) => {
+  }).then(async (res) => {
     const reader = res.body.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
@@ -24,8 +22,40 @@ export function streamChat(conversationId, message, onToken, onToolStart, onTool
 
       for (const line of lines) {
         if (line.startsWith('data:')) {
-          const data = line.slice(5).trim()
-          if (data) onToken(data)
+          const raw = line.slice(5).trim()
+          if (!raw) continue
+
+          try {
+            const event = JSON.parse(raw)
+            switch (event.type) {
+              case 'token':
+                onToken(event.data)
+                break
+              case 'tool_start':
+                onToolStart(event.data)
+                break
+              case 'tool_end':
+                onToolEnd(event.data)
+                break
+              case 'react_step':
+                onReactStep(event.data)
+                break
+              case 'done':
+                onDone()
+                break
+              case 'error':
+                onError(new Error(event.data.message || 'Unknown error'))
+                break
+              default:
+                // Unknown event type, treat as token if string
+                if (typeof event.data === 'string') {
+                  onToken(event.data)
+                }
+            }
+          } catch (e) {
+            // Not JSON, treat as plain text token
+            onToken(raw)
+          }
         }
       }
     }
