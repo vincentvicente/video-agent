@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrameX - Turn Any Video into a Searchable Knowledge Base</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0b;
+            color: #e4e4e7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Subtle gradient glow */
+        .bg-glow {
+            position: fixed;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow-2 {
+            position: fixed;
+            bottom: -300px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Nav */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo span { color: #8b5cf6; }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            color: #a1a1aa;
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover { color: white; }
+
+        .nav-cta {
+            background: #8b5cf6 !important;
+            color: white !important;
+            font-weight: 600 !important;
+            border-radius: 10px !important;
+            transition: all 0.2s !important;
+        }
+
+        .nav-cta:hover {
+            background: #7c3aed !important;
+            transform: translateY(-1px);
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 100px 20px 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.2);
+            border-radius: 100px;
+            font-size: 13px;
+            color: #a78bfa;
+            font-weight: 500;
+            margin-bottom: 32px;
+        }
+
+        .hero-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: 800;
+            color: white;
+            line-height: 1.08;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: #a1a1aa;
+            max-width: 560px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+            font-weight: 400;
+        }
+
+        /* Keyword highlight - glowing underline */
+        .kw {
+            position: relative;
+            color: white;
+            font-weight: 600;
+        }
+        .kw::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0%;
+            height: 2px;
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+            border-radius: 2px;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible .kw::after,
+        .hero-enter .kw::after {
+            width: 100%;
+        }
+        /* Stagger underline animation for multiple .kw in same parent */
+        .kw:nth-of-type(2)::after { transition-delay: 0.15s; }
+        .kw:nth-of-type(3)::after { transition-delay: 0.3s; }
+        .kw:nth-of-type(4)::after { transition-delay: 0.45s; }
+
+        /* Accent text emphasis */
+        .serif-accent {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            color: #c4b5fd;
+        }
+
+        /* Animated number highlight */
+        .glow-num {
+            color: white;
+            text-shadow: 0 0 20px rgba(139,92,246,0.4);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(139,92,246,0.3);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: transparent;
+            color: #e4e4e7;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-secondary:hover {
+            border-color: #3f3f46;
+            background: rgba(255,255,255,0.03);
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            padding: 48px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 40px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -1px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .stat-number span {
+            color: #8b5cf6;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #71717a;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Divider */
+        .divider {
+            max-width: 1100px;
+            margin: 0 auto;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #27272a, transparent);
+        }
+
+        /* Features */
+        .features-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-label {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #8b5cf6;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 42px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #71717a;
+            max-width: 500px;
+            margin: 0 auto 64px;
+        }
+
+        /* Feature row - alternating layout */
+        .feature-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .feature-row.reverse .feature-content { order: 2; }
+        .feature-row.reverse .feature-visual { order: 1; }
+
+        .feature-content {
+            padding: 20px 0;
+        }
+
+        .feature-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.15);
+            border-radius: 6px;
+            font-size: 12px;
+            color: #a78bfa;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .feature-content h3 {
+            font-size: 30px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .feature-content > p {
+            color: #a1a1aa;
+            line-height: 1.7;
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            color: #a1a1aa;
+            line-height: 1.5;
+        }
+
+        .feature-list li .check {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border-radius: 50%;
+            background: rgba(34,197,94,0.1);
+            color: #22c55e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            margin-top: 1px;
+        }
+
+        .feature-metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(139,92,246,0.08);
+            border: 1px solid rgba(139,92,246,0.12);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #c4b5fd;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .feature-metric i { color: #8b5cf6; }
+
+        /* Feature visual - demo mockup */
+        .feature-visual {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .mockup-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #09090b;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .mockup-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .mockup-dot.red { background: #ef4444; }
+        .mockup-dot.yellow { background: #eab308; }
+        .mockup-dot.green { background: #22c55e; }
+
+        .mockup-content {
+            padding: 24px;
+        }
+
+        .mockup-search {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .mockup-search-input {
+            flex: 1;
+            padding: 10px 14px;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 8px;
+            color: #a1a1aa;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .mockup-search-btn {
+            padding: 10px 16px;
+            background: #8b5cf6;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+            cursor: default;
+        }
+
+        .mockup-result {
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .mockup-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .mockup-time {
+            font-size: 11px;
+            color: #8b5cf6;
+            font-weight: 600;
+        }
+
+        .mockup-score {
+            font-size: 11px;
+            padding: 2px 8px;
+            background: rgba(139,92,246,0.15);
+            color: #a78bfa;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .mockup-text {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.5;
+        }
+
+        /* Q&A mockup */
+        .mockup-chat { padding: 24px; }
+
+        .mockup-msg {
+            margin-bottom: 12px;
+            display: flex;
+        }
+
+        .mockup-msg.user { justify-content: flex-end; }
+
+        .mockup-bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .mockup-msg.user .mockup-bubble {
+            background: #8b5cf6;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .mockup-msg.ai .mockup-bubble {
+            background: #27272a;
+            color: #a1a1aa;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Transcript mockup */
+        .mockup-transcript-line {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #1e1e21;
+        }
+
+        .mockup-ts {
+            font-size: 11px;
+            color: #8b5cf6;
+            font-weight: 600;
+            white-space: nowrap;
+            min-width: 60px;
+        }
+
+        .mockup-ttext {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.5;
+        }
+
+        /* Steps - Demo */
+        .steps-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .demo-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 64px;
+            margin-top: 64px;
+        }
+
+        .demo-step {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 48px;
+            align-items: center;
+        }
+        .demo-step.reverse .demo-text { order: 2; }
+        .demo-step.reverse .demo-window { order: 1; }
+
+        .demo-text {}
+
+        .demo-step-num {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #8b5cf6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .demo-step-num .num {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: rgba(139,92,246,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .demo-text h3 {
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .demo-text p {
+            font-size: 14px;
+            color: #71717a;
+            line-height: 1.7;
+        }
+
+        /* Demo window (mock app) */
+        .demo-window {
+            background: #0c0c0e;
+            border: 1px solid #1e1e21;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .demo-titlebar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            background: #09090b;
+            border-bottom: 1px solid #1e1e21;
+        }
+        .demo-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .demo-dot.r { background: #ef4444; }
+        .demo-dot.y { background: #eab308; }
+        .demo-dot.g { background: #22c55e; }
+        .demo-titlebar-text {
+            margin-left: 8px;
+            font-size: 11px;
+            color: #3f3f46;
+            font-weight: 500;
+        }
+
+        .demo-body { padding: 20px; min-height: 200px; }
+
+        /* Step 1: URL input mock */
+        .demo-url-row { display: flex; gap: 8px; }
+        .demo-url-input {
+            flex: 1;
+            padding: 10px 14px;
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #8b5cf6;
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .demo-url-btn {
+            padding: 10px 18px;
+            background: #8b5cf6;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: default;
+            font-family: 'Inter', sans-serif;
+        }
+        .demo-url-hint {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #3f3f46;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .demo-url-hint i { color: #22c55e; }
+
+        /* Step 2: Progress mock */
+        .demo-progress-bar {
+            height: 6px;
+            background: #1e1e21;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .demo-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #8b5cf6, #6366f1, #3b82f6);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+        .demo-status-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .demo-status-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #3f3f46;
+            transition: color 0.3s;
+        }
+        .demo-status-line.done { color: #4ade80; }
+        .demo-status-line.active { color: #a78bfa; }
+        .demo-status-line i { width: 14px; text-align: center; font-size: 11px; }
+
+        /* Step 3: Results mock */
+        .demo-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #1e1e21;
+        }
+        .demo-tab {
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #3f3f46;
+            border-bottom: 2px solid transparent;
+        }
+        .demo-tab.active { color: #e4e4e7; border-bottom-color: #8b5cf6; }
+
+        .demo-search-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .demo-search-input {
+            flex: 1;
+            padding: 8px 12px;
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #a1a1aa;
+            font-family: 'Inter', sans-serif;
+        }
+        .demo-search-btn {
+            padding: 8px 14px;
+            background: #8b5cf6;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 11px;
+            cursor: default;
+        }
+
+        .demo-result {
+            background: #18181b;
+            border: 1px solid #1e1e21;
+            border-left: 3px solid #8b5cf6;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.4s ease;
+        }
+        .demo-result.show { opacity: 1; transform: translateY(0); }
+        .demo-result-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        .demo-result-ts { color: #8b5cf6; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .demo-result-score { color: #a78bfa; font-weight: 700; }
+        .demo-result-text { font-size: 11px; color: #71717a; line-height: 1.5; }
+
+        @media (max-width: 768px) {
+            .demo-step { grid-template-columns: 1fr; gap: 24px; }
+            .demo-step.reverse .demo-text { order: 1; }
+            .demo-step.reverse .demo-window { order: 2; }
+        }
+
+        /* Bottom CTA */
+        .bottom-cta {
+            text-align: center;
+            padding: 80px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bottom-cta h2 {
+            font-size: 40px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .bottom-cta p {
+            color: #71717a;
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 32px 20px;
+            border-top: 1px solid #18181b;
+            color: #52525b;
+            font-size: 13px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== ANIMATIONS ===== */
+
+        /* Scroll reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger children */
+        .reveal-stagger .reveal-child {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-stagger.visible .reveal-child { opacity: 1; transform: translateY(0); }
+        .reveal-stagger.visible .reveal-child:nth-child(1) { transition-delay: 0s; }
+        .reveal-stagger.visible .reveal-child:nth-child(2) { transition-delay: 0.1s; }
+        .reveal-stagger.visible .reveal-child:nth-child(3) { transition-delay: 0.2s; }
+        .reveal-stagger.visible .reveal-child:nth-child(4) { transition-delay: 0.3s; }
+
+        /* Hero entrance */
+        .hero-enter {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: heroIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .hero-enter:nth-child(1) { animation-delay: 0.1s; }
+        .hero-enter:nth-child(2) { animation-delay: 0.25s; }
+        .hero-enter:nth-child(3) { animation-delay: 0.4s; }
+        .hero-enter:nth-child(4) { animation-delay: 0.55s; }
+
+        @keyframes heroIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Gradient text shimmer */
+        .gradient-text {
+            background-size: 200% 100%;
+            animation: gradientShift 6s ease-in-out infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Feature visual float */
+        .feature-visual {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+        }
+        .feature-visual:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 60px rgba(139,92,246,0.12);
+        }
+
+        /* Mockup typing cursor */
+        .mockup-search-input {
+            border-right: 2px solid transparent;
+            animation: cursorBlink 1.2s step-end infinite;
+        }
+        @keyframes cursorBlink {
+            0%, 100% { border-right-color: transparent; }
+            50% { border-right-color: #8b5cf6; }
+        }
+
+        /* Particle canvas */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Glow pulse */
+        .bg-glow {
+            animation: glowPulse 8s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.6; transform: translateX(-50%) scale(1.1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; letter-spacing: -1px; }
+            .hero p { font-size: 16px; }
+            .feature-row { grid-template-columns: 1fr; gap: 32px; }
+            .feature-row.reverse .feature-content { order: 1; }
+            .feature-row.reverse .feature-visual { order: 2; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .stats-bar { gap: 24px; flex-wrap: wrap; }
+            nav { padding: 16px 20px; }
+            .nav-links a:not(.nav-cta) { display: none; }
+            .section-title { font-size: 28px; }
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .reveal, .reveal-stagger .reveal-child, .hero-enter {
+                opacity: 1 !important;
+                transform: none !important;
+                animation: none !important;
+                transition: none !important;
+            }
+            #particle-canvas { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="bg-glow"></div>
+    <div class="bg-glow-2"></div>
+
+    <nav>
+        <a href="/" class="nav-logo"><svg width="32" height="32" viewBox="0 0 44 44" fill="none"><rect x="2" y="2" width="40" height="40" rx="10" stroke="#8b5cf6" stroke-width="2" fill="none"/><polygon points="13,10 28,22 13,34" fill="#8b5cf6"/><polygon points="31,10 16,22 31,34" fill="#8b5cf6" opacity="0.5"/></svg>Frame<span>X</span></a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="/login.html" class="nav-cta">Get Started</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-badge hero-enter">
+            <span class="dot"></span>
+            Free to use &mdash; no credit card required
+        </div>
+        <h1 class="hero-enter">Turn Any Video into a<br><span class="gradient-text">Searchable Knowledge Base</span></h1>
+        <p class="hero-enter">Paste a YouTube link or upload a file. AI <span class="kw">transcribes</span>, <span class="kw">extracts visual text</span>, <span class="kw">indexes</span>, and lets you <span class="kw">semantically search</span> and ask questions about any video content.</p>
+        <div class="hero-buttons hero-enter">
+            <a href="/login.html" class="btn-primary">
+                <i class="fas fa-rocket"></i>
+                Start Free
+            </a>
+            <a href="#features" class="btn-secondary">
+                <i class="fas fa-play-circle"></i>
+                See How It Works
+            </a>
+        </div>
+    </section>
+
+    <div class="stats-bar reveal reveal-stagger">
+        <div class="stat reveal-child">
+            <div class="stat-number" data-count="50" data-suffix="+">0</div>
+            <div class="stat-label">Languages Supported</div>
+        </div>
+        <div class="stat reveal-child">
+            <div class="stat-number" data-count="2" data-prefix="<" data-suffix="min">0</div>
+            <div class="stat-label">Processing Time (10min video)</div>
+        </div>
+        <div class="stat reveal-child">
+            <div class="stat-number" data-count="1536" data-suffix="d">0</div>
+            <div class="stat-label">Embedding Dimensions</div>
+        </div>
+        <div class="stat reveal-child">
+            <div class="stat-number" data-count="0.01" data-prefix="$" data-suffix="">0</div>
+            <div class="stat-label">Avg Cost per Video</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Features -->
+    <section class="features-section" id="features">
+        <div class="section-label reveal">Features</div>
+        <div class="section-title reveal">Everything You Need</div>
+        <div class="section-subtitle reveal">From raw video to <span class="kw">instant answers</span> in minutes.</div>
+
+        <!-- Feature 1: Semantic Search -->
+        <div class="feature-row reveal">
+            <div class="feature-content">
+                <div class="feature-tag"><i class="fas fa-search"></i> Core Feature</div>
+                <h3>Semantic Search</h3>
+                <p>Find any moment in a video by <span class="kw">describing what you're looking for</span>. No need to remember exact keywords.</p>
+                <ul class="feature-list">
+                    <li><span class="check"><i class="fas fa-check"></i></span>Search by meaning, not just keywords</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>Ranked results with similarity scores</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>Timestamps for instant video navigation</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>Works across any language</li>
+                </ul>
+                <div class="feature-metric"><i class="fas fa-bolt"></i> OpenAI text-embedding-3-small &mdash; 1536 dimensions</div>
+            </div>
+            <div class="feature-visual">
+                <div class="mockup-bar">
+                    <div class="mockup-dot red"></div>
+                    <div class="mockup-dot yellow"></div>
+                    <div class="mockup-dot green"></div>
+                </div>
+                <div class="mockup-content">
+                    <div class="mockup-search">
+                        <input class="mockup-search-input" value="How does attention mechanism work?" readonly>
+                        <button class="mockup-search-btn"><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                    <div class="mockup-result">
+                        <div class="mockup-result-header">
+                            <span class="mockup-time"><i class="far fa-clock"></i> 04:32</span>
+                            <span class="mockup-score">94.7%</span>
+                        </div>
+                        <div class="mockup-text">The attention mechanism allows the model to focus on different parts of the input sequence when producing each element of the output...</div>
+                    </div>
+                    <div class="mockup-result">
+                        <div class="mockup-result-header">
+                            <span class="mockup-time"><i class="far fa-clock"></i> 12:18</span>
+                            <span class="mockup-score">89.2%</span>
+                        </div>
+                        <div class="mockup-text">Self-attention computes three vectors for each token: query, key, and value. The dot product of query and key determines...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 2: AI Q&A -->
+        <div class="feature-row reverse reveal">
+            <div class="feature-content">
+                <div class="feature-tag"><i class="fas fa-comments"></i> AI-Powered</div>
+                <h3>Intelligent Q&A</h3>
+                <p>Ask any question about the video and get accurate, <span class="kw">context-aware answers</span> with source citations.</p>
+                <ul class="feature-list">
+                    <li><span class="check"><i class="fas fa-check"></i></span>Answers grounded in actual video content</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>Cites relevant transcript sections</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>Conversational follow-up questions</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>Powered by GPT-4o-mini for fast responses</li>
+                </ul>
+                <div class="feature-metric"><i class="fas fa-brain"></i> RAG pipeline &mdash; top-3 context retrieval</div>
+            </div>
+            <div class="feature-visual">
+                <div class="mockup-bar">
+                    <div class="mockup-dot red"></div>
+                    <div class="mockup-dot yellow"></div>
+                    <div class="mockup-dot green"></div>
+                </div>
+                <div class="mockup-chat">
+                    <div class="mockup-msg user">
+                        <div class="mockup-bubble">What are the key differences between RNN and Transformer?</div>
+                    </div>
+                    <div class="mockup-msg ai">
+                        <div class="mockup-bubble">Based on the video, there are 3 key differences: 1) Transformers process all tokens in parallel while RNNs are sequential, 2) Transformers use self-attention instead of recurrence, 3) Transformers scale better to long sequences due to O(1) path length...</div>
+                    </div>
+                    <div class="mockup-msg user">
+                        <div class="mockup-bubble">Why does parallel processing matter?</div>
+                    </div>
+                    <div class="mockup-msg ai">
+                        <div class="mockup-bubble">The video explains that parallel processing enables significantly faster training on GPUs. While RNNs must process tokens one-by-one, Transformers compute all positions simultaneously...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3: Transcription -->
+        <div class="feature-row reveal">
+            <div class="feature-content">
+                <div class="feature-tag"><i class="fas fa-file-alt"></i> Automatic</div>
+                <h3>Speech + Visual Text Extraction</h3>
+                <p>High-quality transcription with Whisper plus <span class="kw">OCR extraction</span> of on-screen text from slides, code, and diagrams.</p>
+                <ul class="feature-list">
+                    <li><span class="check"><i class="fas fa-check"></i></span>50+ languages auto-detected</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>Precise word-level timestamps</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>OCR for slides, code, diagrams on screen</li>
+                    <li><span class="check"><i class="fas fa-check"></i></span>Upload files or paste YouTube URLs</li>
+                </ul>
+                <div class="feature-metric"><i class="fas fa-microphone"></i> Whisper + Tesseract OCR &mdash; free & offline</div>
+            </div>
+            <div class="feature-visual">
+                <div class="mockup-bar">
+                    <div class="mockup-dot red"></div>
+                    <div class="mockup-dot yellow"></div>
+                    <div class="mockup-dot green"></div>
+                </div>
+                <div class="mockup-content">
+                    <div class="mockup-transcript-line">
+                        <span class="mockup-ts">00:00:12</span>
+                        <span class="mockup-ttext">Welcome to today's lecture on the Transformer architecture and its impact on modern AI.</span>
+                    </div>
+                    <div class="mockup-transcript-line">
+                        <span class="mockup-ts">00:00:28</span>
+                        <span class="mockup-ttext">The paper "Attention Is All You Need" was published in 2017 by Vaswani et al.</span>
+                    </div>
+                    <div class="mockup-transcript-line">
+                        <span class="mockup-ts">00:00:45</span>
+                        <span class="mockup-ttext">It proposed replacing recurrence entirely with a mechanism called self-attention.</span>
+                    </div>
+                    <div class="mockup-transcript-line">
+                        <span class="mockup-ts">00:01:03</span>
+                        <span class="mockup-ttext">This was revolutionary because it allowed for much greater parallelization during training.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- How It Works -->
+    <section class="steps-section" id="how-it-works">
+        <div class="section-label reveal">How It Works</div>
+        <div class="section-title reveal">Three Simple Steps</div>
+        <div class="section-subtitle reveal">From any video to <span class="serif-accent">knowledge base</span> in minutes.</div>
+
+        <div class="demo-steps">
+            <!-- Step 1: Paste -->
+            <div class="demo-step reveal" id="demo-step-1">
+                <div class="demo-text">
+                    <div class="demo-step-num"><span class="num">1</span> Step One</div>
+                    <h3>Add a Video</h3>
+                    <p>Paste a YouTube URL or drag &amp; drop a video/audio file. FrameX handles downloading, audio extraction, and everything else <span class="kw">automatically</span>.</p>
+                </div>
+                <div class="demo-window">
+                    <div class="demo-titlebar">
+                        <div class="demo-dot r"></div>
+                        <div class="demo-dot y"></div>
+                        <div class="demo-dot g"></div>
+                        <span class="demo-titlebar-text">FrameX</span>
+                    </div>
+                    <div class="demo-body">
+                        <div class="demo-url-row">
+                            <div class="demo-url-input" id="demo-url-text"></div>
+                            <div class="demo-url-btn"><i class="fas fa-bolt"></i> Process</div>
+                        </div>
+                        <div class="demo-url-hint" id="demo-url-hint" style="opacity:0">
+                            <i class="fas fa-check-circle"></i> Valid YouTube URL detected
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Process -->
+            <div class="demo-step reverse reveal" id="demo-step-2">
+                <div class="demo-text">
+                    <div class="demo-step-num"><span class="num">2</span> Step Two</div>
+                    <h3>AI Does the Heavy Lifting</h3>
+                    <p>FrameX <span class="kw">downloads</span> the video, <span class="kw">transcribes</span> audio with Whisper, <span class="kw">extracts on-screen text</span> via OCR, <span class="kw">chunks</span> the content, and generates <span class="kw">semantic embeddings</span>. Fully automatic.</p>
+                </div>
+                <div class="demo-window">
+                    <div class="demo-titlebar">
+                        <div class="demo-dot r"></div>
+                        <div class="demo-dot y"></div>
+                        <div class="demo-dot g"></div>
+                        <span class="demo-titlebar-text">Processing...</span>
+                    </div>
+                    <div class="demo-body">
+                        <div class="demo-progress-bar">
+                            <div class="demo-progress-fill" id="demo-progress"></div>
+                        </div>
+                        <div class="demo-status-lines" id="demo-statuses">
+                            <div class="demo-status-line" data-step="0"><i class="fas fa-circle"></i> Downloading video</div>
+                            <div class="demo-status-line" data-step="1"><i class="fas fa-circle"></i> Extracting audio</div>
+                            <div class="demo-status-line" data-step="2"><i class="fas fa-circle"></i> Transcribing with Whisper</div>
+                            <div class="demo-status-line" data-step="3"><i class="fas fa-circle"></i> Extracting visual text (OCR)</div>
+                            <div class="demo-status-line" data-step="4"><i class="fas fa-circle"></i> Chunking content</div>
+                            <div class="demo-status-line" data-step="5"><i class="fas fa-circle"></i> Generating embeddings</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Search & Ask -->
+            <div class="demo-step reveal" id="demo-step-3">
+                <div class="demo-text">
+                    <div class="demo-step-num"><span class="num">3</span> Step Three</div>
+                    <h3>Search & Ask Anything</h3>
+                    <p><span class="kw">Semantically search</span> any moment in the video or ask questions and get <span class="kw">AI-powered answers</span> with citations from the transcript.</p>
+                </div>
+                <div class="demo-window">
+                    <div class="demo-titlebar">
+                        <div class="demo-dot r"></div>
+                        <div class="demo-dot y"></div>
+                        <div class="demo-dot g"></div>
+                        <span class="demo-titlebar-text">FrameX &mdash; Results</span>
+                    </div>
+                    <div class="demo-body">
+                        <div class="demo-tabs">
+                            <div class="demo-tab active"><i class="fas fa-search"></i> Search</div>
+                            <div class="demo-tab"><i class="fas fa-comments"></i> Q&A</div>
+                        </div>
+                        <div class="demo-search-row">
+                            <div class="demo-search-input" id="demo-search-text"></div>
+                            <div class="demo-search-btn"><i class="fas fa-arrow-right"></i></div>
+                        </div>
+                        <div id="demo-results">
+                            <div class="demo-result" id="demo-r1">
+                                <div class="demo-result-top">
+                                    <span class="demo-result-ts"><i class="far fa-clock"></i> 04:32</span>
+                                    <span class="demo-result-score">94.7%</span>
+                                </div>
+                                <div class="demo-result-text">The attention mechanism allows the model to focus on different parts of the input sequence when producing each output element...</div>
+                            </div>
+                            <div class="demo-result" id="demo-r2">
+                                <div class="demo-result-top">
+                                    <span class="demo-result-ts"><i class="far fa-clock"></i> 12:18</span>
+                                    <span class="demo-result-score">89.2%</span>
+                                </div>
+                                <div class="demo-result-text">Self-attention computes query, key, and value vectors for each token. The dot product determines how much attention each token pays...</div>
+                            </div>
+                            <div class="demo-result" id="demo-r3">
+                                <div class="demo-result-top">
+                                    <span class="demo-result-ts"><i class="far fa-clock"></i> 18:45</span>
+                                    <span class="demo-result-score">85.6%</span>
+                                </div>
+                                <div class="demo-result-text">Multi-head attention runs several attention functions in parallel, allowing the model to jointly attend to information from different subspaces...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Bottom CTA -->
+    <section class="bottom-cta reveal">
+        <h2>Ready to Try?</h2>
+        <p><span class="serif-accent">Free to use</span> &mdash; process up to 3 videos, no credit card required.</p>
+        <a href="/login.html" class="btn-primary">
+            <i class="fas fa-arrow-right"></i>
+            Get Started Now
+        </a>
+    </section>
+
+    <footer>
+        FrameX &copy; 2026 &middot; Built with Whisper + OpenAI + Node.js
+    </footer>
+
+    <script>
+        if (localStorage.getItem('token')) {
+            document.querySelectorAll('.nav-cta, .btn-primary').forEach(el => {
+                el.href = '/index.html';
+                el.innerHTML = '<i class="fas fa-arrow-right"></i> Go to App';
+            });
+        }
+
+        // === Scroll Reveal ===
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // === Counter Animation ===
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const target = parseFloat(el.dataset.count);
+                    const prefix = el.dataset.prefix || '';
+                    const suffix = el.dataset.suffix || '';
+                    const isFloat = target % 1 !== 0;
+                    const duration = 1500;
+                    const start = performance.now();
+
+                    function update(now) {
+                        const progress = Math.min((now - start) / duration, 1);
+                        const eased = 1 - Math.pow(1 - progress, 3);
+                        const current = isFloat ? (target * eased).toFixed(2) : Math.round(target * eased);
+                        el.textContent = prefix + current + suffix;
+                        if (progress < 1) requestAnimationFrame(update);
+                    }
+                    requestAnimationFrame(update);
+                    counterObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('[data-count]').forEach(el => counterObserver.observe(el));
+
+        // === Demo Animations ===
+        const demoUrl = 'https://youtube.com/watch?v=dQw4w9WgXcQ';
+        const demoSearch = 'How does attention mechanism work?';
+
+        // Step 1: Type URL
+        const demoObserver1 = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    demoObserver1.unobserve(entry.target);
+                    const el = document.getElementById('demo-url-text');
+                    const hint = document.getElementById('demo-url-hint');
+                    let i = 0;
+                    function typeUrl() {
+                        if (i <= demoUrl.length) {
+                            el.textContent = demoUrl.slice(0, i) + (i < demoUrl.length ? '|' : '');
+                            i++;
+                            setTimeout(typeUrl, 40 + Math.random() * 30);
+                        } else {
+                            el.textContent = demoUrl;
+                            hint.style.opacity = '1';
+                            hint.style.transition = 'opacity 0.4s';
+                        }
+                    }
+                    setTimeout(typeUrl, 600);
+                }
+            });
+        }, { threshold: 0.4 });
+        demoObserver1.observe(document.getElementById('demo-step-1'));
+
+        // Step 2: Progress
+        const demoObserver2 = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    demoObserver2.unobserve(entry.target);
+                    const bar = document.getElementById('demo-progress');
+                    const lines = document.querySelectorAll('#demo-statuses .demo-status-line');
+                    const progresses = [10, 25, 45, 65, 80, 100];
+                    let step = 0;
+                    function advance() {
+                        if (step >= lines.length) return;
+                        lines[step].classList.add('active');
+                        lines[step].querySelector('i').className = 'fas fa-spinner fa-spin';
+                        bar.style.width = progresses[step] + '%';
+                        setTimeout(() => {
+                            lines[step].classList.remove('active');
+                            lines[step].classList.add('done');
+                            lines[step].querySelector('i').className = 'fas fa-check-circle';
+                            step++;
+                            if (step < lines.length) setTimeout(advance, 300);
+                        }, 800);
+                    }
+                    setTimeout(advance, 600);
+                }
+            });
+        }, { threshold: 0.4 });
+        demoObserver2.observe(document.getElementById('demo-step-2'));
+
+        // Step 3: Search results
+        const demoObserver3 = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    demoObserver3.unobserve(entry.target);
+                    const el = document.getElementById('demo-search-text');
+                    let i = 0;
+                    function typeSearch() {
+                        if (i <= demoSearch.length) {
+                            el.textContent = demoSearch.slice(0, i) + (i < demoSearch.length ? '|' : '');
+                            i++;
+                            setTimeout(typeSearch, 35 + Math.random() * 25);
+                        } else {
+                            el.textContent = demoSearch;
+                            // Show results one by one
+                            setTimeout(() => document.getElementById('demo-r1').classList.add('show'), 400);
+                            setTimeout(() => document.getElementById('demo-r2').classList.add('show'), 700);
+                            setTimeout(() => document.getElementById('demo-r3').classList.add('show'), 1000);
+                        }
+                    }
+                    setTimeout(typeSearch, 600);
+                }
+            });
+        }, { threshold: 0.3 });
+        demoObserver3.observe(document.getElementById('demo-step-3'));
+
+        // === Particle Network ===
+        (function() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h, particles, mouse = { x: -1000, y: -1000 };
+            const PARTICLE_COUNT = 60;
+            const CONNECT_DIST = 150;
+            const MOUSE_DIST = 200;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+
+            function createParticles() {
+                particles = [];
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    particles.push({
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        vx: (Math.random() - 0.5) * 0.4,
+                        vy: (Math.random() - 0.5) * 0.4,
+                        r: Math.random() * 2 + 1,
+                        alpha: Math.random() * 0.4 + 0.1
+                    });
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > w) p.vx *= -1;
+                    if (p.y < 0 || p.y > h) p.vy *= -1;
+
+                    // Mouse repel
+                    const dx = p.x - mouse.x;
+                    const dy = p.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < MOUSE_DIST) {
+                        const force = (MOUSE_DIST - dist) / MOUSE_DIST * 0.02;
+                        p.vx += dx * force;
+                        p.vy += dy * force;
+                    }
+
+                    // Dampen velocity
+                    p.vx *= 0.99;
+                    p.vy *= 0.99;
+
+                    // Draw particle
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(139, 92, 246, ${p.alpha})`;
+                    ctx.fill();
+
+                    // Connect nearby particles
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        const cdx = p.x - p2.x;
+                        const cdy = p.y - p2.y;
+                        const cdist = Math.sqrt(cdx * cdx + cdy * cdy);
+                        if (cdist < CONNECT_DIST) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `rgba(139, 92, 246, ${0.08 * (1 - cdist / CONNECT_DIST)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', () => { resize(); createParticles(); });
+            window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+            resize();
+            createParticles();
+            draw();
+        })();
+    </script>
+</body>
+</html>

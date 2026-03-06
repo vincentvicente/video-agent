@@ -1,0 +1,40 @@
+# Secrets
+.env
+
+# Dependencies
+node_modules/
+
+# Python / Whisper
+whisper-env/
+__pycache__/
+*.pyc
+
+# User data (large files)
+data/videos/
+data/audio/
+data/transcripts/
+data/embeddings/
+data/chunks/
+data/cache/
+data/users/
+
+# Database backups
+db/*.sql.backup
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*.backup
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Temp / scripts
+docs/take-screenshots.js

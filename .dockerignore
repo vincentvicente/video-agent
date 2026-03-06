@@ -1,0 +1,12 @@
+node_modules
+whisper-env
+data
+.git
+.env
+*.md
+*.backup
+*.swp
+*.swo
+video-processor/node_modules
+experiments
+logs

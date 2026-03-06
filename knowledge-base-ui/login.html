@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrameX - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0b;
+            color: #e4e4e7;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Left panel - product intro */
+        .left-panel {
+            flex: 1;
+            background: #0a0a0b;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 32px;
+            left: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #71717a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: #a1a1aa; }
+
+        .left-content {
+            max-width: 440px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 48px;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand span { color: #8b5cf6; }
+
+        .left-content h1 {
+            font-size: 36px;
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .left-content h1 .highlight {
+            color: #8b5cf6;
+        }
+
+        .left-content > p {
+            font-size: 16px;
+            color: #71717a;
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+
+        .feature-items {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .feature-item-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 10px;
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b5cf6;
+            font-size: 16px;
+        }
+
+        .feature-item-text h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .feature-item-text p {
+            font-size: 13px;
+            color: #71717a;
+            line-height: 1.5;
+        }
+
+        /* Right panel - auth form */
+        .right-panel {
+            width: 520px;
+            min-width: 520px;
+            background: #18181b;
+            border-left: 1px solid #27272a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .auth-form-wrapper {
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: #71717a;
+            margin-bottom: 32px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: #27272a;
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 28px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #71717a;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .mode-btn.active {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #a1a1aa;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #e4e4e7;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input::placeholder { color: #52525b; }
+
+        .form-group input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .submit-btn:hover {
+            background: #7c3aed;
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-msg {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #fca5a5;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-msg.visible { display: block; }
+
+        .name-field { display: none; }
+        .name-field.visible { display: block; }
+
+        .spinner-small {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+
+        .spinner-small.visible { display: block; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #52525b;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+
+            .left-panel {
+                padding: 40px 24px 32px;
+                min-height: auto;
+            }
+
+            .back-link {
+                position: static;
+                margin-bottom: 24px;
+            }
+
+            .left-content h1 { font-size: 28px; }
+            .feature-items { display: none; }
+
+            .right-panel {
+                width: 100%;
+                min-width: 100%;
+                border-left: none;
+                border-top: 1px solid #27272a;
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Left: Product Info -->
+    <div class="left-panel">
+        <a href="/" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+        <div class="left-content">
+            <div class="brand"><svg width="36" height="36" viewBox="0 0 44 44" fill="none"><rect x="2" y="2" width="40" height="40" rx="10" stroke="#8b5cf6" stroke-width="2" fill="none"/><polygon points="13,10 28,22 13,34" fill="#8b5cf6"/><polygon points="31,10 16,22 31,34" fill="#8b5cf6" opacity="0.5"/></svg>Frame<span>X</span></div>
+            <h1>Turn Videos into <span class="highlight">Knowledge</span></h1>
+            <p>AI-powered video analysis. Paste a YouTube link, get instant semantic search and Q&A on any video content.</p>
+            <div class="feature-items">
+                <div class="feature-item">
+                    <div class="feature-item-icon"><i class="fas fa-search"></i></div>
+                    <div class="feature-item-text">
+                        <h4>Semantic Search</h4>
+                        <p>Find any moment by meaning, not keywords</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-icon"><i class="fas fa-comments"></i></div>
+                    <div class="feature-item-text">
+                        <h4>AI Q&A</h4>
+                        <p>Ask questions, get cited answers from video</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-icon"><i class="fas fa-microphone"></i></div>
+                    <div class="feature-item-text">
+                        <h4>Free Transcription</h4>
+                        <p>Local Whisper model, 50+ languages, zero cost</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Auth Form -->
+    <div class="right-panel">
+        <div class="auth-form-wrapper">
+            <div class="auth-title" id="auth-title">Welcome back</div>
+            <div class="auth-subtitle" id="auth-subtitle">Sign in to your account</div>
+
+            <div class="mode-toggle">
+                <button class="mode-btn active" onclick="setMode('login')">Sign In</button>
+                <button class="mode-btn" onclick="setMode('register')">Create Account</button>
+            </div>
+
+            <div class="error-msg" id="error-msg"></div>
+
+            <form onsubmit="handleSubmit(event)">
+                <div class="form-group name-field" id="name-field">
+                    <label>Name</label>
+                    <input type="text" id="name-input" placeholder="Your name (optional)">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email-input" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password-input" placeholder="Min 8 characters" required minlength="8">
+                </div>
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    <span id="btn-text">Sign In</span>
+                    <div class="spinner-small" id="btn-spinner"></div>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Free tier &middot; up to 3 videos
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mode = 'login';
+
+        if (localStorage.getItem('token')) {
+            window.location.href = '/index.html';
+        }
+
+        function setMode(m) {
+            mode = m;
+            document.querySelectorAll('.mode-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', (i === 0 && m === 'login') || (i === 1 && m === 'register'));
+            });
+            document.getElementById('name-field').classList.toggle('visible', m === 'register');
+            document.getElementById('btn-text').textContent = m === 'login' ? 'Sign In' : 'Create Account';
+            document.getElementById('auth-title').textContent = m === 'login' ? 'Welcome back' : 'Create your account';
+            document.getElementById('auth-subtitle').textContent = m === 'login' ? 'Sign in to your account' : 'Start building your video knowledge base';
+            document.getElementById('error-msg').classList.remove('visible');
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const spinner = document.getElementById('btn-spinner');
+            const errorEl = document.getElementById('error-msg');
+
+            btn.disabled = true;
+            spinner.classList.add('visible');
+            errorEl.classList.remove('visible');
+
+            const body = {
+                email: document.getElementById('email-input').value,
+                password: document.getElementById('password-input').value,
+            };
+            if (mode === 'register') {
+                body.name = document.getElementById('name-input').value;
+            }
+
+            try {
+                const res = await fetch(`/api/auth/${mode}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+
+                localStorage.setItem('token', data.token);
+                if (data.user) {
+                    localStorage.setItem('userName', data.user.name || data.user.email);
+                }
+                window.location.href = '/index.html';
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.add('visible');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.remove('visible');
+            }
+        }
+    </script>
+</body>
+</html>

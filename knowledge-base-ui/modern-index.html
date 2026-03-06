@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 视频知识库 ✨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 40px;
+            filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: 4px;
+        }
+
+        /* Video Input Panel */
+        .video-input-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 32px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .panel-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .url-input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        .url-input-group input {
+            flex: 1;
+            padding: 18px 24px 18px 56px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .url-input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 20px;
+            z-index: 1;
+        }
+
+        .modern-btn {
+            padding: 18px 36px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .modern-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .modern-btn:active {
+            transform: translateY(0);
+        }
+
+        .modern-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Progress Bar */
+        .processing-status {
+            display: none;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 24px;
+            border-radius: 16px;
+            margin-top: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .processing-status.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .status-message {
+            margin-top: 12px;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Video Library */
+        .video-library {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .video-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .video-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .video-card.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-color: #667eea;
+        }
+
+        .video-card.active::before {
+            transform: scaleX(1);
+        }
+
+        .video-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .video-meta {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Main Content Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panel */
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .panel-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Search Box */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 16px 20px 16px 52px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 16px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .search-box input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .search-btn {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Results Container */
+        .results-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .timestamp-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .similarity-badge {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .result-text {
+            color: #444;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        /* Messages */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 12px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 16px 20px;
+            border-radius: 20px;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .message.assistant .message-bubble {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Transcript */
+        .transcript-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+
+        .transcript-item {
+            padding: 20px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .transcript-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+            padding-left: 24px;
+        }
+
+        .transcript-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #667eea;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .transcript-text {
+            color: #444;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #764ba2 0%, #667eea 100%);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .panel {
+                height: 600px;
+            }
+
+            .url-input-group {
+                flex-direction: column;
+            }
+
+            .modern-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span class="logo-icon float-animation">🎬</span>
+                <span>AI 视频知识库</span>
+            </h1>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-label">视频时长</div>
+                    <div class="stat-value" id="duration">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🗣️</div>
+                    <div class="stat-label">语言</div>
+                    <div class="stat-value" id="language">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🧬</div>
+                    <div class="stat-label">向量数量</div>
+                    <div class="stat-value" id="vectors">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-label">成本</div>
+                    <div class="stat-value">< $0.01</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Input -->
+        <div class="video-input-panel">
+            <div class="panel-title">
+                <i class="fas fa-plus-circle"></i>
+                <span>添加新视频到知识库</span>
+            </div>
+            <div class="url-input-wrapper">
+                <div class="url-input-group">
+                    <div style="position: relative; flex: 1;">
+                        <i class="fas fa-link input-icon"></i>
+                        <input
+                            type="text"
+                            id="video-url-input"
+                            placeholder="粘贴 YouTube 视频链接..."
+                            onkeypress="if(event.key==='Enter') processNewVideo()"
+                        />
+                    </div>
+                    <button class="modern-btn" id="process-btn" onclick="processNewVideo()">
+                        <i class="fas fa-rocket"></i>
+                        <span>自动处理</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="processing-status" id="processing-status">
+                <div class="progress-header">
+                    <div class="spinner"></div>
+                    <span>处理中...</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="status-message" id="status-message">准备开始...</div>
+            </div>
+
+            <div class="video-library" id="video-library" style="display: none;">
+                <!-- Videos will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Search Panel -->
+                <div class="panel" style="height: 450px;">
+                    <div class="panel-header">
+                        <i class="fas fa-search" style="color: #667eea;"></i>
+                        <h2>语义搜索</h2>
+                    </div>
+                    <div class="search-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <div class="search-box">
+                            <input
+                                type="text"
+                                id="search-input"
+                                placeholder="搜索视频内容..."
+                                onkeypress="if(event.key==='Enter') search()"
+                            />
+                            <button class="search-btn" onclick="search()">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="results-container" id="search-results">
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <div class="empty-text">输入关键词开始搜索</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QA Panel -->
+                <div class="panel" style="height: 450px;">
+                    <div class="panel-header">
+                        <i class="fas fa-comments" style="color: #667eea;"></i>
+                        <h2>智能问答</h2>
+                    </div>
+                    <div class="messages-container" id="messages">
+                        <div class="empty-state">
+                            <div class="empty-icon">💡</div>
+                            <div class="empty-text">提问任何关于视频的问题</div>
+                        </div>
+                    </div>
+                    <div class="search-wrapper">
+                        <i class="fas fa-comment-dots search-icon"></i>
+                        <div class="search-box">
+                            <input
+                                type="text"
+                                id="question-input"
+                                placeholder="输入问题..."
+                                onkeypress="if(event.key==='Enter') askQuestion()"
+                            />
+                            <button class="search-btn" onclick="askQuestion()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Transcript -->
+            <div class="panel">
+                <div class="panel-header">
+                    <i class="fas fa-file-alt" style="color: #667eea;"></i>
+                    <h2>完整转录</h2>
+                </div>
+                <div class="transcript-container" id="transcript">
+                    <div class="empty-state">
+                        <div class="empty-icon">📺</div>
+                        <div class="empty-text">选择或添加视频查看转录</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentVideoId = null;
+        let processingIntervalId = null;
+
+        // Same JavaScript functionality as before
+        async function loadVideos() {
+            try {
+                const response = await fetch('/api/videos');
+                const videos = await response.json();
+
+                if (videos.length > 0) {
+                    const library = document.getElementById('video-library');
+                    library.style.display = 'grid';
+                    library.innerHTML = videos.map(v => `
+                        <div class="video-card ${v.id === currentVideoId ? 'active' : ''}"
+                             onclick="selectVideo('${v.id}')">
+                            <div class="video-title">
+                                <i class="fas fa-play-circle"></i>
+                                <span>${v.id}</span>
+                            </div>
+                            <div class="video-meta">
+                                <div class="meta-item">
+                                    <i class="far fa-clock"></i>
+                                    <span>${Math.floor(v.duration / 60)}分钟</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-language"></i>
+                                    <span>${v.language === 'zh' ? '中文' : v.language}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-cubes"></i>
+                                    <span>${v.chunk_count} 块</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    if (!currentVideoId) {
+                        selectVideo(videos[0].id);
+                    }
+                }
+            } catch (error) {
+                console.error('Load videos error:', error);
+            }
+        }
+
+        async function selectVideo(videoId) {
+            try {
+                const response = await fetch('/api/set-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoId })
+                });
+
+                if (response.ok) {
+                    currentVideoId = videoId;
+                    await loadVideoInfo();
+                    await loadTranscript();
+                    loadVideos();
+                }
+            } catch (error) {
+                console.error('Select video error:', error);
+            }
+        }
+
+        async function processNewVideo() {
+            const input = document.getElementById('video-url-input');
+            const url = input.value.trim();
+
+            if (!url) {
+                alert('请输入视频URL');
+                return;
+            }
+
+            if (!url.includes('youtube.com/watch')) {
+                alert('请输入有效的YouTube视频链接');
+                return;
+            }
+
+            const btn = document.getElementById('process-btn');
+            const status = document.getElementById('processing-status');
+
+            btn.disabled = true;
+            status.classList.add('active');
+
+            try {
+                const response = await fetch('/api/process-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'exists') {
+                    alert('视频已在知识库中！');
+                    selectVideo(data.videoId);
+                    status.classList.remove('active');
+                    btn.disabled = false;
+                    return;
+                }
+
+                if (data.status === 'started') {
+                    startProgressPolling(data.videoId);
+                }
+            } catch (error) {
+                alert('处理失败: ' + error.message);
+                status.classList.remove('active');
+                btn.disabled = false;
+            }
+        }
+
+        function startProgressPolling(videoId) {
+            processingIntervalId = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/process-status/${videoId}`);
+                    const data = await response.json();
+
+                    document.getElementById('progress-fill').style.width = data.progress + '%';
+                    document.getElementById('status-message').textContent = data.message || '处理中...';
+
+                    if (data.status === 'completed') {
+                        clearInterval(processingIntervalId);
+                        document.getElementById('processing-status').classList.remove('active');
+                        document.getElementById('process-btn').disabled = false;
+                        document.getElementById('video-url-input').value = '';
+                        alert('✅ 视频处理完成！');
+                        await loadVideos();
+                        selectVideo(videoId);
+                    } else if (data.status === 'failed') {
+                        clearInterval(processingIntervalId);
+                        document.getElementById('processing-status').classList.remove('active');
+                        document.getElementById('process-btn').disabled = false;
+                        alert('❌ 处理失败: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Progress poll error:', error);
+                }
+            }, 2000);
+        }
+
+        async function loadVideoInfo() {
+            try {
+                const response = await fetch('/api/video-info');
+                const info = await response.json();
+
+                document.getElementById('duration').textContent =
+                    `${Math.floor(info.duration / 60)}分${Math.floor(info.duration % 60)}秒`;
+                document.getElementById('language').textContent =
+                    info.language === 'zh' ? '中文' : info.language;
+                document.getElementById('vectors').textContent = info.vector_count;
+            } catch (error) {
+                console.error('Load video info error:', error);
+            }
+        }
+
+        async function loadTranscript() {
+            try {
+                const response = await fetch('/api/transcript');
+                const segments = await response.json();
+
+                const container = document.getElementById('transcript');
+                container.innerHTML = segments.map(seg => `
+                    <div class="transcript-item">
+                        <div class="transcript-time">
+                            <i class="far fa-clock"></i>
+                            <span>${seg.start}</span>
+                        </div>
+                        <div class="transcript-text">${seg.text}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Load transcript error:', error);
+            }
+        }
+
+        async function search() {
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+
+            const container = document.getElementById('search-results');
+            container.innerHTML = '<div class="empty-state"><div class="empty-icon"><div class="spinner"></div></div><div class="empty-text">搜索中...</div></div>';
+
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+
+                const results = await response.json();
+
+                if (results.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-text">未找到相关内容</div></div>';
+                    return;
+                }
+
+                container.innerHTML = results.map(result => `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="timestamp-badge">
+                                <i class="far fa-clock"></i>
+                                <span>${result.timestamp || '未知'}</span>
+                            </div>
+                            <div class="similarity-badge">${(result.similarity * 100).toFixed(1)}%</div>
+                        </div>
+                        <div class="result-text">${result.text}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Search error:', error);
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-text">搜索失败</div></div>';
+            }
+        }
+
+        async function askQuestion() {
+            const input = document.getElementById('question-input');
+            const question = input.value.trim();
+            if (!question) return;
+
+            const messagesContainer = document.getElementById('messages');
+
+            if (messagesContainer.querySelector('.empty-state')) {
+                messagesContainer.innerHTML = '';
+            }
+
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `<div class="message-bubble">${question}</div>`;
+            messagesContainer.appendChild(userMessage);
+
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+
+                const assistantMessage = document.createElement('div');
+                assistantMessage.className = 'message assistant';
+                assistantMessage.innerHTML = `<div class="message-bubble">${data.answer}</div>`;
+                messagesContainer.appendChild(assistantMessage);
+
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error('Ask error:', error);
+            }
+        }
+
+        // Initialize
+        loadVideos();
+    </script>
+</body>
+</html>

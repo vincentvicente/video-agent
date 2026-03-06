@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/vicentezhu/claude-workspace/data"
+      ],
+      "description": "File system access for reading/writing data"
+    },
+    "text-chunker": {
+      "command": "node",
+      "args": [
+        "/Users/vicentezhu/claude-workspace/mcp-servers/text-chunker/index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production",
+        "LOG_LEVEL": "info"
+      },
+      "description": "Text chunking, cleaning, and keyword extraction"
+    },
+    "vector-db": {
+      "command": "node",
+      "args": [
+        "/Users/vicentezhu/claude-workspace/mcp-servers/vector-db/index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "DB_PATH": "/Users/vicentezhu/claude-workspace/data/embeddings",
+        "EMBEDDING_MODEL": "text-embedding-3-small",
+        "EMBEDDING_DIMENSION": "1536"
+      },
+      "description": "Vector database for storing and searching embeddings"
+    },
+    "video-processor": {
+      "command": "node",
+      "args": [
+        "/Users/vicentezhu/claude-workspace/mcp-servers/video-processor/index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "VIDEOS_DIR": "/Users/vicentezhu/claude-workspace/data/videos",
+        "AUDIO_DIR": "/Users/vicentezhu/claude-workspace/data/audio",
+        "TRANSCRIPTS_DIR": "/Users/vicentezhu/claude-workspace/data/transcripts",
+        "WHISPER_MODEL": "whisper-1"
+      },
+      "description": "Video download, audio extraction, and transcription"
+    }
+  },
+  "globalSettings": {
+    "timeout": 300000,
+    "retries": 3,
+    "logLevel": "info"
+  }
+}
