@@ -41,13 +41,11 @@
   <img src="docs/images/landing-full.png" alt="FrameX Landing Page" width="700">
 </p>
 
-### Authentication
+### Login & Dashboard
 
 <p align="center">
   <img src="docs/images/login.png" alt="FrameX Login" width="700">
 </p>
-
-### Dashboard
 
 IDE-like interface with video library, semantic search, Q&A, and transcript browsing.
 
